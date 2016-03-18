@@ -8,7 +8,7 @@
  *
  * Download: http://yourjs.com/snippets/build/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,89,90,91,92,93,94,95,96,97,98,99
  */
-(function(__global, __EMPTY_OBJECT, __EMPTY_ARRAY, __EXPORTS_EXISTS, __MODULE_EXPORTS_EXISTS, undefined) {
+(function(__global, __EMPTY_OBJECT, __EMPTY_ARRAY, undefined) {
   var document = __global.document;
   function YourJS(o, opt_chained) {
     if (o instanceof YourJS) {
@@ -1894,8 +1894,8 @@
   }).prototype);
   
   // Add to browser/node environment correctly.
-  if(__EXPORTS_EXISTS) {
-    if(__MODULE_EXPORTS_EXISTS) {
+  if(typeof exports !== 'undefined') {
+    if(typeof module !== 'undefined' && module.exports) {
       exports = module.exports = YourJS;
     }
     exports.JS = YourJS;
@@ -1903,4 +1903,4 @@
   else {
     __global.JS = YourJS;
   }
-})(typeof window == 'undefined' ? this : window, {}, [], typeof exports !== 'undefined', typeof module !== 'undefined' && module.exports);
+})('undefined' == typeof window ? this : window, {}, []);
