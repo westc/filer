@@ -1,0 +1,256 @@
+<html>
+<head>
+  <title>Filer</title>
+  <style type="text/css">
+  body {
+    font-family: Verdana;
+    overflow: hidden;
+
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#61b5ff+0,43a4ff+50,278fff+51,0061fc+100 */
+    background: #61b5ff; /* Old browsers */
+    background: -moz-linear-gradient(-45deg,  #61b5ff 0%, #43a4ff 50%, #278fff 51%, #0061fc 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(-45deg,  #61b5ff 0%,#43a4ff 50%,#278fff 51%,#0061fc 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(135deg,  #61b5ff 0%,#43a4ff 50%,#278fff 51%,#0061fc 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#61b5ff', endColorstr='#0061fc',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+  }
+  legend {
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 0 0 5px #FFF, 0 0 5px #FFF, 0 0 5px #FFF;
+  }
+
+  fieldset {
+    border: 1px solid rgba(127,127,127,0.25);
+    border-radius: 10px;
+    padding: 5px 10px 10px;
+    background: rgba(255,255,255,0.5);
+  }
+  #tblFiles {
+    width: 100%;
+  }
+  .trDir > td {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ffea9f+0,ffdd6d+40,ffd025+100 */
+    background: #ffea9f; /* Old browsers */
+    background: -moz-linear-gradient(top,  #ffea9f 0%, #ffdd6d 40%, #ffd025 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #ffea9f 0%,#ffdd6d 40%,#ffd025 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #ffea9f 0%,#ffdd6d 40%,#ffd025 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffea9f', endColorstr='#ffd025',GradientType=0 ); /* IE6-9 */
+  }
+  .trDir.focus > td, .trDir:hover > td {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#fffbed+0,fff8e3+40,fff6d5+100 */
+    background: #fffbed; /* Old browsers */
+    background: -moz-linear-gradient(top,  #fffbed 0%, #fff8e3 40%, #fff6d5 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #fffbed 0%,#fff8e3 40%,#fff6d5 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #fffbed 0%,#fff8e3 40%,#fff6d5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fffbed', endColorstr='#fff6d5',GradientType=0 ); /* IE6-9 */
+  }
+  .trFile > td {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#9ff1ff+0,6decff+40,25deff+100 */
+    background: #9ff1ff; /* Old browsers */
+    background: -moz-linear-gradient(top,  #9ff1ff 0%, #6decff 40%, #25deff 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #9ff1ff 0%,#6decff 40%,#25deff 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #9ff1ff 0%,#6decff 40%,#25deff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9ff1ff', endColorstr='#25deff',GradientType=0 ); /* IE6-9 */
+  }
+  .trFile.focus > td, .trFile:hover > td {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#d9f9ff+0,c5f7ff+40,a7f2ff+100 */
+    background: #d9f9ff; /* Old browsers */
+    background: -moz-linear-gradient(top,  #d9f9ff 0%, #c5f7ff 40%, #a7f2ff 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #d9f9ff 0%,#c5f7ff 40%,#a7f2ff 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #d9f9ff 0%,#c5f7ff 40%,#a7f2ff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d9f9ff', endColorstr='#a7f2ff',GradientType=0 ); /* IE6-9 */
+  }
+  .tdCheck {
+    width: 1px;
+    padding: 5px 0 5px 5px;
+  }
+  .tdTextboxes {
+    width: 99%;
+  }
+  .tblTextboxes {
+    width: 100%;
+  }
+  .tdOld, .tdNew {
+    width: 50%;
+  }
+  .tdOld, .tdNew, .tdArrow {
+    padding: 5px 5px 5px 0;
+  }
+  .tdOld input[type=text], .tdNew input[type=text] {
+    background: rgba(255,255,255,0.4);
+    border: 1px inset rgba(255,255,255,0.5);
+    padding: 3px;
+    border-radius: 3px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .tdOld input[type=text]:focus, .tdNew input[type=text]:focus {
+    background: #FFF;
+    border: 1px inset #FFF;
+  }
+
+  #tblWrap {
+    height: 100%;
+    width: 100%;
+  }
+  #tdLeftTopPanel {
+    height: 1px;
+    width: 30%;
+  }
+  #tdLeftBottomPanel {
+    height: 99%;
+    width: 30%;
+  }
+  #tdRightPanel {
+    width: 70%;
+  }
+  #divFilesWrap, #divEditorWrap {
+    position: absolute;
+    overflow: auto;
+    top: 20px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid #000;
+  }
+  
+  .relative {
+    position: relative;
+  }
+  .height-1px {
+    height: 1px;
+  }
+  .height-99pct {
+    height: 99%;
+  }
+  .height-100pct {
+    height: 100%;
+  }
+  .width-1px {
+    width: 1px;
+  }
+  .width-99pct {
+    width: 99%;
+  }
+  .width-100pct {
+    width: 100%;
+  }
+
+  #tdButton {
+    padding: 5px 3px 0;
+  }
+  #btnRenameFiles {
+    box-shadow: inset 1px 1px 0px 0px #4db2ff, 0 0 3px 1px #000;
+    border: none;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#4db2ff+0,5bb5ff+50,259dff+51,159aff+100 */
+    background: #4db2ff; /* Old browsers */
+    background: -moz-linear-gradient(top, #4db2ff 0%, #5bb5ff 50%, #259dff 51%, #159aff 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #4db2ff 0%, #5bb5ff 50%, #259dff 51%, #159aff 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #4db2ff 0%, #5bb5ff 50%, #259dff 51%, #159aff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4db2ff', endColorstr='#159aff',GradientType=0); /* IE6-9 */
+    border-radius: 42px;
+    display: inline-block;
+    cursor: pointer;
+    color: #000;
+    font-family: Verdana;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    text-shadow: 4px 4px 2px rgba(0,0,0,0.3);
+    width: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+    text-align: center;
+    outline: none;
+    transition: 0.125s ease all;
+  }
+  #btnRenameFiles:hover {
+    color: rgba(0,0,0,0.7);
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#79c5ff+0,85c8ff+50,5bb5ff+51,4fb3ff+100 */
+    background: #79c5ff; /* Old browsers */
+    background: -moz-linear-gradient(top, #79c5ff 0%, #85c8ff 50%, #5bb5ff 51%, #4fb3ff 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #79c5ff 0%, #85c8ff 50%, #5bb5ff 51%, #4fb3ff 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #79c5ff 0%, #85c8ff 50%, #5bb5ff 51%, #4fb3ff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#79c5ff', endColorstr='#4fb3ff',GradientType=0); /* IE6-9 */
+  }
+  #btnRenameFiles:active {
+    box-shadow: inset 0 0 10px 1px #FFF;
+    outline: none;
+    position: relative;
+    top: 1px;
+  }
+  </style>
+</head>
+<body>
+  <table id="tblWrap" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td id="tdLeftTopPanel" class="height-1px">
+        <fieldset id="fldDir">
+          <legend>Root Directory</legend>
+          <table border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="width: 99%;">
+                <input type="text" id="txtRoot" style="width: 100%;" placeholder="Root directory path (eg. /Users/jsmith/Movies)" readonly />
+              </td>
+              <td style="width: 1px;">
+                <input type="button" id="btnRoot" value="Select Directory" />
+              </td>
+            </tr>
+          </table>
+        </fieldset>
+      </td>
+      <td id="tdRightPanel" rowspan="2" class="height-100pct">
+        <table border="0" cellpadding="0" cellspacing="0" class="height-100pct width-100pct">
+          <tr>
+            <td class="height-1px">
+              <fieldset id="fldPattern">
+                <legend>Renamer Function</legend>
+                <table border="0" cellpadding="0" cellspacing="0" class="width-100pct">
+                  <tr>
+                    <td class="width-99pct"><select id="selRenamer" class="width-100pct"></select></td>
+                    <td class="width-1px"><input type="button" id="btnApply" value="Apply" /></td>
+                  </tr>
+                </table>
+              </fieldset>
+            </td>
+          </tr>
+          <tr>
+            <td class="height-99pct">
+              <fieldset id="fldFunctions" class="height-100pct relative">
+                <legend>Functions</legend>
+                <div id="divEditorWrap">
+                  <div id="editor" class="height-100pct"></div>
+                </div>
+              </fieldset>
+            </td>
+          </tr>
+          <tr>
+            <td class="height-1px" id="tdButton">
+              <button id="btnRenameFiles">Rename Files</button>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td id="tdLeftBottomPanel" class="height-99pct">
+        <fieldset id="fldFiles" class="height-100pct relative">
+          <legend>Directories &amp; Files</legend>
+          <div id="divFilesWrap">
+            <table id="tblFiles" border="0" cellpadding="0" cellspacing="0"></table>
+          </div>
+        </fieldset>
+      </td>
+    </tr>
+  </table>
+
+  <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script>
+  $ = jQuery = require('./jquery-2.2.1.min.js');
+  require('./YourJS/JS.min.js');
+  require('./app.js');
+  require('./menu.js');
+  </script>
+</body>
+</html>

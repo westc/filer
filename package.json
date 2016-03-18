@@ -1,0 +1,17 @@
+{
+  "name": "filer",
+  "version": "1.0.0",
+  "description": "Renames and moves files and directories in bulk.",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . Filer --platform=darwin --arch=x64 --version=0.36.8"
+  },
+  "author": "Christopher West",
+  "license": "ISC",
+  "devDependencies": {
+    "electron-packager": "^5.2.1",
+    "electron-prebuilt": "^0.36.8",
+    "musicmetadata": "^2.0.2"
+  }
+}
