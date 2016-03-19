@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . Filer --platform=darwin --arch=x64 --version=0.36.8"
+    "build": "electron-packager . Filer --version=0.36.8"
   },
   "author": "Christopher West",
   "license": "ISC",
