@@ -48,9 +48,6 @@ try {
   editor.setValue(fs.readFileSync(FUNCTIONS_PATH, 'utf8'));
 } catch (e) {alert(e.name + '\n' + e.message + '\n' + e.stack);}
 
-top.window.moveTo(0, 0);
-top.window.resizeTo(screen.availWidth, screen.availHeight);
-
 function recurseDirSync(currentDirPath, depthLeft, opt_filter) {
   depthLeft--;
 

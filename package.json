@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . Filer --version=0.36.8"
+    "build": "electron-packager . Filer --version=0.36.8",
+    "build-mac32": "electron-packager . Filer --version=0.36.8 --platform=darwin --arch=ia32 --icon=images/icon.icns",
+    "build-mac64": "electron-packager . Filer --version=0.36.8 --platform=darwin --arch=x64 --icon=images/icon.icns",
+    "build-win32": "electron-packager . Filer --version=0.36.8 --platform=win32 --arch=ia32 --icon=images/icon.ico",
+    "build-win64": "electron-packager . Filer --version=0.36.8 --platform=win32 --arch=x64 --icon=images/icon.ico"
   },
   "author": "Christopher West",
   "license": "ISC",
