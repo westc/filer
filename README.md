@@ -8,4 +8,6 @@ This is an Electron desktop app which gives you the ability to rename and move f
 4. Run `npm install`.
 5. To run the app without actually building it you can run `npm start`.
 6. To build the app you will want to make sure the `scripts.build` params are correct in `package.json` and then you can run `npm run build`.
-   * You need to include the platform and the architecture arguments when building.  Eg. `npm run build -- --platform=darwin --arch=x64`
+   * You need to include the platform and the architecture arguments when building.
+
+      Eg. `npm run build -- --platform=darwin --arch=x64`
