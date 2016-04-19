@@ -23,25 +23,30 @@ editor.setOptions({
   tabSize: 2,
   useSoftTabs: true
 });
-editor.on("change", JS.callReturn(JS.debounce(function() {
+editor.on("change", JS(function() {
   var value = editor.getValue();
+  var oldCtx = ctx;
   vm.createScript(value, { timeout: 3000 }).runInNewContext(ctx = { JS: JS, console: BASE_CONSOLE });
   fs.writeFile(FUNCTIONS_PATH, value, 'utf8');
 
   var jSel = $('#selRenamer');
-  var selected = jSel.find(':selected').val();
+  var i = 0, selectedIndex = jSel.prop('selectedIndex');
   jSel.html('');
   JS.walk(ctx, function(fn, name) {
     if (JS.typeOf(fn, 'Function') && fn != JS && !/^_/.test(name)) {
+      if (oldCtx && oldCtx[name] + '' != fn + '') {
+        selectedIndex = i;
+      }
       jSel.append(JS.dom({
         nodeName: 'option',
         textContent: name,
-        value: name,
-        selected: selected == name
+        value: name
       }));
+      i++;
     }
   }, JS.keys(ctx).sort());
-}, 1000)));
+  jSel.prop('selectedIndex', JS.clamp(selectedIndex, 0));
+}).debounce(500).callReturn().$);
 
 try {
   fs.openSync(FUNCTIONS_PATH, 'r+');
@@ -67,24 +72,6 @@ function recurseDirSync(currentDirPath, depthLeft, opt_filter) {
     }
   });
   return result;
-}
-
-function unnestArray(arr, callback) {
-  function recurse(arr, path) {
-    function f(arr, opt_insertBefore) {
-      dontAddRet = dontAddRet || !arguments.length;
-      if (arr) {
-        results.push.apply(opt_insertBefore ? results : after, recurse(arr, curPath));
-      }
-    }
-    for (var ret, dontAddRet, curPath, results = [], after = [], i = 0, l = arr.length; i < l; i++) {
-      dontAddRet = 0;
-      ret = callback(arr[i], f, curPath = path.concat([i]), arr);
-      results = results.concat(dontAddRet ? [] : [ret], after.splice(0));
-    }
-    return results;
-  }
-  return recurse(arr, []);
 }
 
 var updatePreview = JS.debounce(function() {
@@ -115,11 +102,11 @@ function setDir(dirPath, inMaxDirDepth) {
   var dir = recurseDirSync(txtRoot.value = dirPath, inMaxDirDepth);
   rootPath = dir.path.replace(/([^\\\/])[\\\/]$/, '$1');
   maxDirDepth = inMaxDirDepth;
-  (files = unnestArray([dir], function(file, recurse) {
+  (files = JS.unnest([dir], function(file, index, add, recurse) {
+    add(file);
     if (file.files) {
       recurse(file.files);
     }
-    return file;
   })).shift();
 
   files.forEach(function(file, i) {
@@ -212,14 +199,6 @@ $('#btnRenameFiles').click(function() {
       if (!fs.existsSync(newPath)) {
         fs.renameSync(oldPath, newPath);
       }
-
-      // If this is a directory make sure to fix the paths of all of the underlying files.
-      unnestArray([file], function(file, recurse) {
-        if (file.files) {
-          recurse(file.files);
-        }
-        return file;
-      });
     }
   });
 

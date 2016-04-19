@@ -4,21 +4,20 @@
  *
  * Copyright (c) 2015-2016 Christopher West (cwest)
  * Licensed under the MIT license.
- * http://yourjs.com/license?snippets=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,89,90,91,92,93,94,95,96,97,98,99
+ * http://yourjs.com/license?build_id=2
  *
- * Download: http://yourjs.com/snippets/build/1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,89,90,91,92,93,94,95,96,97,98,99
+ * Download: http://yourjs.com/build/2?libName=JS
  */
 (function(__global, __EMPTY_OBJECT, __EMPTY_ARRAY, undefined) {
   var document = __global.document;
-  function YourJS(o, opt_chained) {
+  function YourJS(o, opt_multi) {
     if (o instanceof YourJS) {
       return o;
     }
     if (!(this instanceof YourJS)) {
-      return new YourJS(o, opt_chained);
+      return new YourJS(o, opt_multi);
     }
-    this._me = o;
-    this._chained = !!opt_chained;
+    this.$ = (this.$$ = opt_multi ? slice(o) : [o]).shift();
   }
 
   var has = alias(__EMPTY_OBJECT.hasOwnProperty, 'call');
@@ -50,8 +49,162 @@
     return objToExtend;
   }
 
-  function chain(o) {
-    return new YourJS(o, 1);
+  // isArrayLike() & toArray() - http://yourjs.com/snippets/81
+  function isArrayLike(o) {
+    var l, i, t;
+    return !!o
+        && typeOf(l = o.length, 'Number')
+        && (t = typeOf(o)) != 'String'
+        && t != 'Function'
+        && (!l || (l > 0 && (i = l - 1) % 1 == 0 && i in o));
+  }
+  
+  function toArray(o) {
+    return isArrayLike(o) ? slice(o) : [o];
+  }
+
+  // walk() - Traverse Array/Object Values - http://yourjs.com/snippets/20
+  function walk(arrOrObj, fn, opt_walkAll) {
+    var done, c = 0, k = 0, l, endWalk = function() { done = arguments; },
+      caller = function(k) { c++; fn.call(endWalk, arrOrObj[k], k, arrOrObj); };
+    if (isArrayLike(opt_walkAll)) {
+      for (l = opt_walkAll.length; k < l; k++) {
+        if (has(opt_walkAll, k)) {
+          caller(opt_walkAll[k]);
+          if (done) { break; }
+        }
+      }
+    }
+    else if (isArrayLike(arrOrObj)) {
+      for (l = arrOrObj.length; k < l; k++) {
+        if (opt_walkAll || has(arrOrObj, k)) {
+          caller(k);
+          if (done) { break; }
+        }
+      }
+    }
+    else {
+      for (k in arrOrObj) {
+        if (opt_walkAll || has(arrOrObj, k)) {
+          caller(k);
+          if (done) { break; }
+        }
+      }
+    }
+    return done || c;
+  }
+
+  // reduce() - http://yourjs.com/snippets/52
+  function reduce(arrOrObj, accumulator, opt_initial) {
+    var hasInitial = arguments.length > 2;
+    walk(arrOrObj, function(value, key) {
+      opt_initial = hasInitial
+        ? accumulator(opt_initial, value, key, arrOrObj)
+        : (hasInitial = 1, value);
+    });
+    if (hasInitial) {
+      return opt_initial;
+    }
+    throw new TypeError('Reduce of empty subject with no initial value');
+  }
+
+  // quoteRegExp() - Escaping RegExp Metacharacters - http://yourjs.com/snippets/27
+  function quoteRegExp(str, opt_flagsOrMakeRegExp) {
+    var ret = str.replace(/[[\](){}.+*^$|\\?-]/g, '\\$&');
+    return opt_flagsOrMakeRegExp == '' || opt_flagsOrMakeRegExp
+      ? new RegExp(ret, opt_flagsOrMakeRegExp == true ? '' : opt_flagsOrMakeRegExp)
+      : ret;
+  }
+
+  // flagRegExp() - Modify RegExp Flags - http://yourjs.com/snippets/28
+  function flagRegExp(rgx, modifiers) {
+    var flags = (rgx + '').replace(/[\s\S]+\//, '');
+    modifiers.replace(/([-+!]?)(\w)/g, function(index, op, flag) {
+      index = flags.indexOf(flag)
+      flags = op == '-' || (op == '!' && index >= 0)
+        ? flags.replace(flag, '')
+        : index < 0
+          ? flags + flag
+          : flags;
+    });
+    return new RegExp(rgx.source, flags);
+  }
+
+  // indexOf() - http://yourjs.com/snippets/8
+  function indexOf(obj, target, opt_fromIndex) {
+    if (isArrayLike(obj)) {
+      for (var i = opt_fromIndex ? opt_fromIndex < 0 ? Math.max(0, obj.length + opt_fromIndex) : opt_fromIndex : 0, l = obj.length; i < l; i++) {
+        if (has(obj, i) && obj[i] === target) {
+          return i;
+        }
+      }
+      return -1;
+    }
+    else if (typeOf(obj = Object(obj), 'String')) {
+      return obj.indexOf(target + '', opt_fromIndex);
+    }
+    for (var key in obj) {
+      if (has(obj, key) && obj[key] === target) {
+        return key;
+      }
+    }
+  }
+
+  // Filter Out Specific Values - http://yourjs.com/snippets/43
+  function filter(arrOrObj, fnFilter) {
+    var me = this, returnsArray = isArrayLike(arrOrObj);
+    return reduce(arrOrObj, function(ret, value, key) {
+      if (fnFilter.call(me, value, key, arrOrObj)) {
+        if (returnsArray) {
+          ret.push(value);
+        }
+        else {
+          ret[key] = value;
+        }
+      }
+      return ret;
+    }, returnsArray ? [] : {});
+  }
+
+  // Parsing URL Query Strings - http://yourjs.com/snippets/56
+  function parseQS(url) {
+    var vars = {};
+    url.replace(/\?[^#]+/, function(query) {
+      query.replace(/\+/g, ' ').replace(/[\?&]([^=&#]+)(?:=([^&#]*))?/g, function(m, key, value, arrIndicator, alreadyDefined, lastValue) {
+        key = decodeURIComponent(key);
+        if (arrIndicator = key.slice(-2) == '[]') {
+          key = key.slice(0, -2);
+        }
+        value = value && decodeURIComponent(value);
+        alreadyDefined = has(vars, key);
+        lastValue = vars[key];
+        vars[key] = arrIndicator || alreadyDefined
+          ? typeOf(lastValue, 'Array')
+            ? lastValue.concat([value])
+            : alreadyDefined
+              ? [lastValue, value]
+              : [value]
+          : value;
+      });
+    });
+    return vars;
+  }
+
+  // isEmpty() & isFalsy() - http://yourjs.com/snippets/75
+  function isEmpty(value) {
+    if (isArrayLike(value = Object(value))) {
+      return !value.length;
+    }
+    for (var k in value) {
+      if (has(value, k)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  function isFalsy(value, opt_strict) {
+    return !value || (!opt_strict && (isArrayLike(value) || value.constructor == Object) && isEmpty(value));
   }
 
   // isClass() - http://yourjs.com/snippets/1
@@ -304,26 +457,6 @@
     return ret = opt_round ? Math.round(ret) : ret;
   }
 
-  // indexOf() - http://yourjs.com/snippets/8
-  function indexOf(obj, target, opt_fromIndex) {
-    if (isArrayLike(obj)) {
-      for (var i = opt_fromIndex ? opt_fromIndex < 0 ? Math.max(0, obj.length + opt_fromIndex) : opt_fromIndex : 0, l = obj.length; i < l; i++) {
-        if (has(obj, i) && obj[i] === target) {
-          return i;
-        }
-      }
-      return -1;
-    }
-    else if (typeOf(obj = Object(obj), 'String')) {
-      return obj.indexOf(target + '', opt_fromIndex);
-    }
-    for (var key in obj) {
-      if (has(obj, key) && obj[key] === target) {
-        return key;
-      }
-    }
-  }
-
   // includes() - http://yourjs.com/snippets/9
   function includes(obj, target, opt_fromIndex) {
     var index = indexOf(obj, target, opt_fromIndex);
@@ -516,37 +649,6 @@
     return oldValue;
   }
 
-  // walk() - Traverse Array/Object Values - http://yourjs.com/snippets/20
-  function walk(arrOrObj, fn, opt_walkAll) {
-    var done, c = 0, k = 0, l, endWalk = function() { done = arguments; },
-      caller = function(k) { c++; fn.call(endWalk, arrOrObj[k], k, arrOrObj); };
-    if (isArrayLike(opt_walkAll)) {
-      for (l = opt_walkAll.length; k < l; k++) {
-        if (has(opt_walkAll, k)) {
-          caller(opt_walkAll[k]);
-          if (done) { break; }
-        }
-      }
-    }
-    else if (isArrayLike(arrOrObj)) {
-      for (l = arrOrObj.length; k < l; k++) {
-        if (opt_walkAll || has(arrOrObj, k)) {
-          caller(k);
-          if (done) { break; }
-        }
-      }
-    }
-    else {
-      for (k in arrOrObj) {
-        if (opt_walkAll || has(arrOrObj, k)) {
-          caller(k);
-          if (done) { break; }
-        }
-      }
-    }
-    return done || c;
-  }
-
   // param() - http://yourjs.com/snippets/21
   function param(callback, arrFields) {
     for (var t, defaults = [], len = arrFields.length, i = len; i--;) {
@@ -658,28 +760,6 @@
   // The same as PHP's (from php.js) urldecode().
   function unescape(str) {
     return decodeURIComponent(str.replace(/%(?![\dA-F]{2})/gi, '%25').replace(/\+/g, '%20'));
-  }
-
-  // quoteRegExp() - Escaping RegExp Metacharacters - http://yourjs.com/snippets/27
-  function quoteRegExp(str, opt_flagsOrMakeRegExp) {
-    var ret = str.replace(/[[\](){}.+*^$|\\?-]/g, '\\$&');
-    return opt_flagsOrMakeRegExp == '' || opt_flagsOrMakeRegExp
-      ? new RegExp(ret, opt_flagsOrMakeRegExp == true ? '' : opt_flagsOrMakeRegExp)
-      : ret;
-  }
-
-  // flagRegExp() - Modify RegExp Flags - http://yourjs.com/snippets/28
-  function flagRegExp(rgx, modifiers) {
-    var flags = (rgx + '').replace(/[\s\S]+\//, '');
-    modifiers.replace(/([-+!]?)(\w)/g, function(index, op, flag) {
-      index = flags.indexOf(flag)
-      flags = op == '-' || (op == '!' && index >= 0)
-        ? flags.replace(flag, '')
-        : index < 0
-          ? flags + flag
-          : flags;
-    });
-    return new RegExp(rgx.source, flags);
   }
 
   // replace() - String Replacement - http://yourjs.com/snippets/29
@@ -828,22 +908,6 @@
     return typeOf(value, 'Number') && __global.isFinite(value);
   }
 
-  // Filter Out Specific Values - http://yourjs.com/snippets/43
-  function filter(arrOrObj, fnFilter) {
-    var me = this, returnsArray = isArrayLike(arrOrObj);
-    return reduce(arrOrObj, function(ret, value, key) {
-      if (fnFilter.call(me, value, key, arrOrObj)) {
-        if (returnsArray) {
-          ret.push(value);
-        }
-        else {
-          ret[key] = value;
-        }
-      }
-      return ret;
-    }, returnsArray ? [] : {});
-  }
-
   // Splitting Strings - http://yourjs.com/snippets/44
   function dice(str, delim, opt_limit) {
     var arr = [], start = 0, i;
@@ -910,59 +974,56 @@
     return arr;
   }
 
-  // Create DOM Elements - http://yourjs.com/snippets/49
+  // dom() - Write HTML in JS - http://yourjs.com/snippets/49
   var dom;
-  (function(regExpDash, innerText, textContent) {
-    function cap$1($0, $1) {
-      return $1.toUpperCase();
+  (function(RGX_DASH, INNER_TEXT, TEXT_CONTENT, STRING, PROP_HASH) {
+    function capAfterDash(m, afterDash) {
+      return afterDash.toUpperCase();
     }
-    
     dom = function(obj) {
-      var elem;
-      if (typeOf(obj) == 'String') {
-        elem = slice(dom({ nodeName: 'DIV', innerHTML: obj }).childNodes);
+      var elem, propName, propValue, i, l, j, c, style, stylePropName, kids;
+      if (typeOf(obj, STRING)) {
+        elem = slice(dom({ _: 'DIV', html: obj }).childNodes);
       }
       else {
-        elem = document.createElement(obj.nodeName);
-        for (var propName in obj) {
-          var propValue = obj[propName];
-          if (propName == 'style') {
-            var style = elem[propName];
-            if (typeOf(propValue) == 'String') {
-              style.cssText = propValue;
-            }
-            else {
-              for (var stylePropName in propValue) {
-                if (has(propValue, stylePropName)) {
-                  style[stylePropName.replace(regExpDash, cap$1)] = propValue[stylePropName];
+        elem = document.createElement(obj.nodeName || obj._);
+        for (propName in obj) {
+          propValue = obj[propName];
+          if (has(obj, propName) && (propName = PROP_HASH[propName] || propName) != '_') {
+            if (propName == 'style') {
+              style = elem[propName];
+              if (typeOf(propValue, STRING)) {
+                style.cssText = propValue;
+              }
+              else {
+                for (stylePropName in propValue) {
+                  if (has(propValue, stylePropName)) {
+                    style[stylePropName.replace(RGX_DASH, capAfterDash)] = propValue[stylePropName];
+                  }
                 }
               }
             }
-          }
-          else if (propName == innerText || propName == textContent) {
-            elem[textContent] = elem[innerText] = propValue;
-          }
-          else if (propName == 'children') {
-            var child, i = 0;
-            while (child = propValue[i++]) {
-              child = dom(child);
-              if (typeOf(child) != 'Array') {
-                child = [child];
-              }
-              var kid, j = 0;
-              while (kid = child[j++]) {
-                elem.appendChild(kid);
+            else if (propName == INNER_TEXT || propName == TEXT_CONTENT) {
+              elem[TEXT_CONTENT] = elem[INNER_TEXT] = propValue;
+            }
+            else if (propName == '$') {
+              propValue = toArray(propValue);
+              for (i = 0, l = propValue.length; i < l;) {
+                for (kids = toArray(dom(propValue[i++])), j = 0, c = kids.length; j < c;) {
+                  elem.appendChild(kids[j++]);
+                }
               }
             }
-          }
-          else if (propName != 'nodeName') {
-            elem[propName] = propValue;
+            else {
+              elem[propName] = propValue;
+            }
           }
         }
       }
       return elem;
-    }
-  })(/-([^-])/g, 'innerText', 'textContent');
+    };
+  })(/-([^-])/g, 'innerText', 'textContent', 'String',
+    {nodeName:'_',html:'innerHTML',text:'innerText',children:'$','for':'htmlFor','class':'className',cls:'className'});
 
   // reParam() - http://yourjs.com/snippets/50
   function reParam(callback, arrFields) {
@@ -1001,20 +1062,6 @@
       return "";
     });
     form.submit();
-  }
-
-  // reduce() - http://yourjs.com/snippets/52
-  function reduce(arrOrObj, accumulator, opt_initial) {
-    var hasInitial = arguments.length > 2;
-    walk(arrOrObj, function(value, key) {
-      opt_initial = hasInitial
-        ? accumulator(opt_initial, value, key, arrOrObj)
-        : (hasInitial = 1, value);
-    });
-    if (hasInitial) {
-      return opt_initial;
-    }
-    throw new TypeError('Reduce of empty subject with no initial value');
   }
 
   // doEvery() - http://yourjs.com/snippets/53
@@ -1088,33 +1135,9 @@
     return true;
   }
 
-  // Parsing URL Query Strings - http://yourjs.com/snippets/56
-  function parseQS(url) {
-    var vars = {};
-    url.replace(/\?[^#]+/, function(query) {
-      query.replace(/\+/g, ' ').replace(/[\?&]([^=&#]+)(?:=([^&#]*))?/g, function(m, key, value, arrIndicator, alreadyDefined, lastValue) {
-        key = decodeURIComponent(key);
-        if (arrIndicator = key.slice(-2) == '[]') {
-          key = key.slice(0, -2);
-        }
-        value = value && decodeURIComponent(value);
-        alreadyDefined = has(vars, key);
-        lastValue = vars[key];
-        vars[key] = arrIndicator || alreadyDefined
-          ? typeOf(lastValue, 'Array')
-            ? lastValue.concat([value])
-            : alreadyDefined
-              ? [lastValue, value]
-              : [value]
-          : value;
-      });
-    });
-    return vars;
-  }
-
   // map() - Map Array/Object Values - http://yourjs.com/snippets/57
   function map(arrOrObj, fn, opt_mapAll) {
-    var ret = typeOf(arrOrObj, 'Array') ? [] : {};
+    var ret = isArrayLike(arrOrObj) ? [] : {};
     walk(arrOrObj, function(v, k) {
       ret[k] = fn.apply(this, arguments);
     }, opt_mapAll);
@@ -1218,15 +1241,17 @@
   }
 
   // matchAll() - Get All Matching Substrings - http://yourjs.com/snippets/65
-  function matchAll(str, rgx) {
+  function matchAll(str, rgx, opt_fnMapper) {
     var arr, extras, matches = [];
-    str.replace(rgx.global ? rgx : new RegExp(rgx.source, (rgx + '').replace(/[\s\S]+\//g , 'g')), function() {
-      matches.push(arr = slice(arguments));
+    str.replace(rgx = rgx.global ? rgx : new RegExp(rgx.source, (rgx + '').replace(/[\s\S]+\//g , 'g')), function() {
+      arr = slice(arguments);
       extras = arr.splice(-2);
       arr.index = extras[0];
       arr.input = extras[1];
+      arr.source = rgx;
+      matches.push(opt_fnMapper ? opt_fnMapper.apply(arr, arr) : arr);
     });
-    return matches[0] ? matches : null;
+    return arr ? matches : null;
   }
 
   // String Padding - ES7 Style - http://yourjs.com/snippets/66
@@ -1380,23 +1405,6 @@
     return array.splice(opt_index == undefined ? -1 : opt_index, 1)[0];
   }
 
-  // isEmpty() & isFalsy() - http://yourjs.com/snippets/75
-  function isEmpty(value) {
-    if (isArrayLike(value = Object(value))) {
-      return !value.length;
-    }
-    for (var k in value) {
-      if (has(value, k)) {
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  function isFalsy(value, opt_strict) {
-    return !value || (!opt_strict && (isArrayLike(value) || value.constructor == Object) && isEmpty(value));
-  }
-
   // Spreading Array Values To A Function - http://yourjs.com/snippets/76
   function spread(fn) {
     return function(args) {
@@ -1467,20 +1475,6 @@
           end = new Date;
       times.call(fn, end - start, start, end, ret, arguments, this);
     };
-  }
-
-  // isArrayLike() & toArray() - http://yourjs.com/snippets/81
-  function isArrayLike(o) {
-    var l, i, t;
-    return !!o
-        && typeOf(l = o.length, 'Number')
-        && (t = typeOf(o)) != 'String'
-        && t != 'Function'
-        && (!l || (l > 0 && (i = l - 1) % 1 == 0 && i in o));
-  }
-  
-  function toArray(o) {
-    return isArrayLike(o) ? slice(o) : [o];
   }
 
   // indexBy() - Indexing an Array/Object By New Criteria - http://yourjs.com/snippets/82
@@ -1755,20 +1749,65 @@
     fn.apply(this, slice(arguments, 1));
     return fn;
   }
+
+  // unnest() - Flatten Nested Structures - http://yourjs.com/snippets/100
+  function unnest(arrOrObj, fn, opt_initial, opt_skipRecursives) {
+    var initialIsArray = typeOf(opt_initial = opt_initial || (isArrayLike(arrOrObj) ? [] : {}), 'Array');
+    function add(valueToAdd, opt_index) {
+      if (opt_index == undefined && initialIsArray) {
+        opt_initial.push(valueToAdd);
+      }
+      else {
+        opt_initial[opt_index] = valueToAdd;
+      }
+    }
+    function helper(parent, path, seen, seenCount) {
+      var newPath;
+      seen = [parent].concat(seen);
+      seenCount++;
+      function recurse(value) {
+        for (var i = seenCount; i--;) {
+          if (seen[i] === value) {
+            if (opt_skipRecursives) {
+              return;
+            }
+            throw new Error('Cannot unnest recursive, nested structures.');
+          }
+        }
+        helper(value, newPath, seen, seenCount);
+      }
+      walk(parent, function(value, index) {
+        fn(value, index, add, recurse, parent, newPath = path.concat([index]), arrOrObj);
+      });
+    }
+    helper(arrOrObj, [], [], 0);
+    return opt_initial;
+  }
+
+  // ids() - Unique Element IDs - http://yourjs.com/snippets/101
+  function ids(ids, opt_document) {
+    opt_document = opt_document || document;
+    var suffix, i, l = (ids = typeOf(ids, 'Array') ? ids : [ids]).length, ret = [];
+    ret.input = ids;
+    do {
+      ret.suffix = suffix = ('_' + Math.random()).replace('0.', '');
+      for (i = 0; i < l && !opt_document.getElementById(ret[i] = ids[i] + suffix); i++);
+    } while (i < l);
+    return ret;
+  }
   
   (function(__prototype__, __k__) {
     for (__k__ in YourJS) {
       (function(k, v) {
-        if (has(YourJS, k) && typeOf(v, 'Function')) {
+        if (has(YourJS, k) && typeOf(v, 'Function') && k != 'jPaq') {
           __prototype__[k] = function() {
-            var ret = v.apply(this, [this._me].concat(slice(arguments)));
-            return this._chained ? new YourJS(ret, 1) : ret;
+            return new YourJS(v.apply(this, [this.$].concat(this.$$, slice(arguments))));
           };
         }
       })(__k__, YourJS[__k__]);
     }
-    __prototype__.value = function() {
-      return this._me;
+    __prototype__._ = function() {
+      return new YourJS(slice(arguments).concat([this.$], this.$$), 1);
     };
   })(extend(YourJS, {
     typeOf: typeOf,
@@ -1776,7 +1815,17 @@
     has: has,
     slice: slice,
     extend: extend,
-    chain: chain,
+    isArrayLike: isArrayLike,
+    toArray: toArray,
+    walk: walk,
+    reduce: reduce,
+    quoteRegExp: quoteRegExp,
+    flagRegExp: flagRegExp,
+    indexOf: indexOf,
+    filter: filter,
+    parseQS: parseQS,
+    isEmpty: isEmpty,
+    isFalsy: isFalsy,
     isClass: isClass,
     sub: sub,
     getCookie: getCookie,
@@ -1785,7 +1834,6 @@
     limit: limit,
     css: css,
     random: random,
-    indexOf: indexOf,
     includes: includes,
     htmlify: htmlify,
     partial: partial,
@@ -1799,7 +1847,6 @@
     keys: keys,
     values: values,
     put: put,
-    walk: walk,
     param: param,
     titleCase: titleCase,
     intersect: intersect,
@@ -1809,8 +1856,6 @@
     jsonp: jsonp,
     escape: escape,
     unescape: unescape,
-    quoteRegExp: quoteRegExp,
-    flagRegExp: flagRegExp,
     replace: replace,
     nthRoot: nthRoot,
     isoDate: isoDate,
@@ -1824,7 +1869,6 @@
     isSafeInt: isSafeInt,
     isNaN: isNaN,
     isFinite: isFinite,
-    filter: filter,
     dice: dice,
     join: join,
     debounce: debounce,
@@ -1832,11 +1876,9 @@
     dom: dom,
     reParam: reParam,
     postURL: postURL,
-    reduce: reduce,
     doEvery: doEvery,
     fuse: fuse,
     check: check,
-    parseQS: parseQS,
     map: map,
     findIndex: findIndex,
     flatten: flatten,
@@ -1860,16 +1902,12 @@
     log: log,
     pop: pop,
     push: push,
-    isEmpty: isEmpty,
-    isFalsy: isFalsy,
     spread: spread,
     isComposite: isComposite,
     isPrime: isPrime,
     offsetDate: offsetDate,
     fill: fill,
     time: time,
-    isArrayLike: isArrayLike,
-    toArray: toArray,
     indexBy: indexBy,
     compact: compact,
     ordinalize: ordinalize,
@@ -1890,6 +1928,8 @@
     clamp: clamp,
     throttle: throttle,
     callReturn: callReturn,
+    unnest: unnest,
+    ids: ids,
     JS: __global.JS
   }).prototype);
   
@@ -1898,7 +1938,7 @@
     if(typeof module !== 'undefined' && module.exports) {
       exports = module.exports = YourJS;
     }
-    exports.JS = YourJS;
+    (exports.JS = YourJS).JS = undefined;
   } 
   else {
     __global.JS = YourJS;

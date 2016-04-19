@@ -13,3 +13,7 @@ this['Correct Seasons & Episodes'] = function(path, data) {
 this['Custom'] = function(path) {
   return path.replace('Episode 0', 'Episode ');
 };
+
+this['Replace Dashes'] = function(path) {
+  return path.replace(/-/g, '–');
+};
