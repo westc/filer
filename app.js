@@ -14,7 +14,42 @@ var BASE_CONSOLE = JS.map(console, function(value, name) {
 
 var APP_BASE_PATH = path.dirname(require.main.filename);
 var FUNCTIONS_PATH = path.join(APP_BASE_PATH, 'functions.js');
+var APP_SETTINGS_PATH = path.join(APP_BASE_PATH, 'settings.json');
 var ctx, rootPath, maxDirDepth, files = [];
+
+var initDone;
+var appSettings = {
+  _: (function() {
+    var data = { code: '' };
+    try {
+      fs.openSync(APP_SETTINGS_PATH, 'r+');
+      data = JSON.parse(fs.readFileSync(APP_SETTINGS_PATH, 'utf8'));
+    }
+    catch (e) {
+      console.error(e.name + '\n' + e.message + '\n' + e.stack);
+    }
+    return data;
+  })(),
+  set: function(keyOrValues, value) {
+    var isOneValue = JS.typeOf(keyOrValues, 'String'), data = this._;
+    if (isOneValue) {
+      data[keyOrValues] = value;
+    }
+    else {
+      JS.walk(keyOrValues, function(value, key) {
+        data[key] = value;
+      });
+    }
+    this.save();
+    return isOneValue ? value : keyOrValues;
+  },
+  get: function(key, opt_defaultValue) {
+    return JS.has(this._, key) ? this._[key] : opt_defaultValue;
+  },
+  save: JS.debounce(function() {
+    fs.writeFile(APP_SETTINGS_PATH, JSON.stringify(this._, null, 2), 'utf8');
+  }, 500)
+};
 
 var editor = ace.edit("editor");
 editor.setOptions({
@@ -23,14 +58,18 @@ editor.setOptions({
   tabSize: 2,
   useSoftTabs: true
 });
-editor.on("change", JS(function() {
+editor.setValue(appSettings.get('code'));
+editor.on("change", JS.callReturn(function() {
   var value = editor.getValue();
   var oldCtx = ctx;
   vm.createScript(value, { timeout: 3000 }).runInNewContext(ctx = { JS: JS, console: BASE_CONSOLE });
-  fs.writeFile(FUNCTIONS_PATH, value, 'utf8');
+  appSettings.set('code', value);
 
   var jSel = $('#selRenamer');
   var i = 0, selectedIndex = jSel.prop('selectedIndex');
+  jSel.on('change', function() {
+    appSettings.set('renamerIndex', this.selectedIndex);
+  });
   jSel.html('');
   JS.walk(ctx, function(fn, name) {
     if (JS.typeOf(fn, 'Function') && fn != JS && !/^_/.test(name)) {
@@ -45,13 +84,18 @@ editor.on("change", JS(function() {
       i++;
     }
   }, JS.keys(ctx).sort());
-  jSel.prop('selectedIndex', JS.clamp(selectedIndex, 0));
-}).debounce(500).callReturn().$);
+  if (!initDone) {
+    initDone = 1;
+    selectedIndex = appSettings.get('renamerIndex');
+  }
+  jSel.prop('selectedIndex', appSettings.set('renamerIndex', JS.clamp(selectedIndex, 0)));
+}));
 
-try {
-  fs.openSync(FUNCTIONS_PATH, 'r+');
-  editor.setValue(fs.readFileSync(FUNCTIONS_PATH, 'utf8'));
-} catch (e) {alert(e.name + '\n' + e.message + '\n' + e.stack);}
+(function(dirPath, dirDepth) {
+  if (dirPath) {
+    setDir(dirPath, dirDepth);
+  }
+})(appSettings.get('dirPath'), appSettings.get('dirDepth'));
 
 function recurseDirSync(currentDirPath, depthLeft, opt_filter) {
   depthLeft--;
@@ -75,12 +119,14 @@ function recurseDirSync(currentDirPath, depthLeft, opt_filter) {
 }
 
 var updatePreview = JS.debounce(function() {
+  var _ = ctx._;
   var fn = ctx[$('#selRenamer :selected').val()];
   var passMediaTags = fn.GET_MEDIA_TAGS;
 
   $('.trDir, .trFile').each(function(i, tr) {
     var oldPath = $('#txtOldPath' + i, tr).val();
     var file = files[i];
+    ctx._ = { path: oldPath, data: file };
     if (passMediaTags) {
       mm(fs.createReadStream(file.path), function (err, metadata) {
         $('#txtNewPath' + i, tr).val(fn(oldPath, file, err ? false : metadata));
@@ -90,11 +136,13 @@ var updatePreview = JS.debounce(function() {
       $('#txtNewPath' + i, tr).val(fn(oldPath, file));
     }
   });
+
+  ctx._ = _;
 }, 500);
 
-
-
 function setDir(dirPath, inMaxDirDepth) {
+  appSettings.set({ dirPath: dirPath, dirDepth: inMaxDirDepth });
+
   // Remove previously established rows.
   $('#tblFiles').html('');
 
