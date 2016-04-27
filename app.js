@@ -59,7 +59,7 @@ editor.setOptions({
   useSoftTabs: true
 });
 editor.setValue(appSettings.get('code'));
-editor.on("change", JS.callReturn(function() {
+editor.on("change", JS(function() {
   var value = editor.getValue();
   var oldCtx = ctx;
   vm.createScript(value, { timeout: 3000 }).runInNewContext(ctx = { JS: JS, console: BASE_CONSOLE });
@@ -67,9 +67,6 @@ editor.on("change", JS.callReturn(function() {
 
   var jSel = $('#selRenamer');
   var i = 0, selectedIndex = jSel.prop('selectedIndex');
-  jSel.on('change', function() {
-    appSettings.set('renamerIndex', this.selectedIndex);
-  });
   jSel.html('');
   JS.walk(ctx, function(fn, name) {
     if (JS.typeOf(fn, 'Function') && fn != JS && !/^_/.test(name)) {
@@ -89,7 +86,11 @@ editor.on("change", JS.callReturn(function() {
     selectedIndex = appSettings.get('renamerIndex');
   }
   jSel.prop('selectedIndex', appSettings.set('renamerIndex', JS.clamp(selectedIndex, 0)));
-}));
+
+// NOTE:  Debounce no only prevents the updated script from being run every
+// time a character changes but also prevents a weird error that was causing
+// the caret to jump around every time an error was introduced.
+}).debounce(500).callReturn().$);
 
 (function(dirPath, dirDepth) {
   if (dirPath) {
@@ -139,6 +140,10 @@ var updatePreview = JS.debounce(function() {
 
   ctx._ = _;
 }, 500);
+
+$('#selRenamer').on('change', function() {
+  appSettings.set('renamerIndex', this.selectedIndex);
+});
 
 function setDir(dirPath, inMaxDirDepth) {
   appSettings.set({ dirPath: dirPath, dirDepth: inMaxDirDepth });
