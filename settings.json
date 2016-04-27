@@ -1,6 +1,4 @@
 {
   "code": "this['Correct Seasons & Episodes'] = function(path, data) {\n  return path\n    .replace(/S(?:eason )?0*(\\d+) ?E(?:pisode(s?) )?0*(\\d+)/i, 'Season $1 - Episode$2 $3')\n    .replace(/\\/(Season )/i, ' - $1')\n    .replace(/\\/([\\S\\s]+?) (?:- )?Season (\\d+)/i, '/$1/Season $2')\n    .replace(/\\/Season (\\d+) (?:- )Episode(s?) (\\d+)/i, '/Season $1/Episode$2 $3');\n};  \n\n(this['MP3/MP4 - Use Embedded Title'] = function(path, data, tags) {\n  return tags && tags.title ? path.replace(/[^\\/]+(?=\\.\\w+$)/, tags.title) : path;\n}).GET_MEDIA_TAGS = true;\n\nthis['Custom'] = function(path) {\n  return path.replace('Episode 0', 'Episode ');\n};\n\nthis['Replace Dashes'] = function(path) {\n  return path.replace(/-/g, '–');\n};",
-  "renamerIndex": 2,
-  "dirPath": "/Users/cwest/Downloads",
-  "dirDepth": 1
+  "renamerIndex": 2
 }

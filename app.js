@@ -255,7 +255,8 @@ $('#btnRenameFiles').click(function() {
 
 $('#btnRoot').click(function() {
   remote.dialog.showOpenDialog({
-    properties: ['openDirectory']
+    properties: ['openDirectory'],
+    defaultPath: appSettings.get('dirPath')
   }, function(paths) {
     if (paths) {
       remote.dialog.showMessageBox({
