@@ -120,21 +120,24 @@ function recurseDirSync(currentDirPath, depthLeft, opt_filter) {
 }
 
 var updatePreview = JS.debounce(function() {
-  var _ = ctx._;
-  var fn = ctx[$('#selRenamer :selected').val()];
-  var passMediaTags = fn.GET_MEDIA_TAGS;
+  var _ = ctx._,
+      fn = ctx[$('#selRenamer :selected').val()],
+      passMediaTags = fn.GET_MEDIA_TAGS;
 
   $('.trDir, .trFile').each(function(i, tr) {
-    var oldPath = $('#txtOldPath' + i, tr).val();
-    var file = files[i];
+    var oldPath = $('#txtOldPath' + i, tr).val(),
+        file = files[i],
+        value;
     ctx._ = { path: oldPath, data: file };
     if (passMediaTags) {
       mm(fs.createReadStream(file.path), function (err, metadata) {
-        $('#txtNewPath' + i, tr).val(fn(oldPath, file, err ? false : metadata));
+        value = fn(oldPath, file, err ? false : metadata);
+        $('#txtNewPath' + i, tr).val(value).data('value', value);
       });
     }
     else {
-      $('#txtNewPath' + i, tr).val(fn(oldPath, file));
+      value = fn(oldPath, file);
+      $('#txtNewPath' + i, tr).val(value).data('value', value);
     }
   });
 
@@ -179,6 +182,15 @@ function setDir(dirPath, inMaxDirDepth) {
       },
       onblur: function() {
         $('#trFile' + i).removeClass('focus');
+      },
+      onclick: function() {
+        var jNew = $('#txtNewPath' + i), jOld = $('#txtOldPath' + i);
+        if (this.checked) {
+          jNew.val(jNew.data('value')).attr('readonly', false);
+        }
+        else {
+          jNew.data('value', jNew.val()).val(jOld.val()).attr('readonly', true);
+        }
       }
     }));
     JS.extend(tr.insertCell(1), {
