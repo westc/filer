@@ -15,7 +15,7 @@ var BASE_CONSOLE = JS.map(console, function(value, name) {
 var APP_BASE_PATH = path.dirname(require.main.filename);
 var FUNCTIONS_PATH = path.join(APP_BASE_PATH, 'functions.js');
 var APP_SETTINGS_PATH = path.join(APP_BASE_PATH, 'settings.json');
-var ctx, rootPath, maxDirDepth, isResizingPanels, files = [];
+var ctx, rootPath, maxDirDepth, isResizingPanels, lastChkIndex, files = [];
 
 var initDone;
 var appSettings = {
@@ -153,6 +153,8 @@ $('#selRenamer').on('change', function() {
 function setDir(dirPath, inMaxDirDepth) {
   appSettings.set({ dirPath: dirPath, dirDepth: inMaxDirDepth });
 
+  lastChkIndex = undefined;
+
   // Remove previously established rows.
   $('#tblFiles').html('');
 
@@ -186,13 +188,22 @@ function setDir(dirPath, inMaxDirDepth) {
       onblur: function() {
         $('#trFile' + i).removeClass('focus');
       },
-      onclick: function() {
+      onclick: function(e) {
         var jNew = $('#txtNewPath' + i), jOld = $('#txtOldPath' + i);
         if (this.checked) {
           jNew.val(jNew.data('value')).attr('readonly', false);
         }
         else {
           jNew.data('value', jNew.val()).val(jOld.val()).attr('readonly', true);
+        }
+
+        if (e.shiftKey && lastChkIndex != undefined && lastChkIndex != i) {
+          for (var step = lastChkIndex - i > 0 ? -1 : 1, j = lastChkIndex; (j += step) != i;) {
+            $('#chkPath' + j).trigger('click');
+          }
+        }
+        else {
+          lastChkIndex = i;
         }
       }
     }));
