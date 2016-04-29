@@ -202,9 +202,7 @@ function setDir(dirPath, inMaxDirDepth) {
             $('#chkPath' + j).trigger('click');
           }
         }
-        else {
-          lastChkIndex = i;
-        }
+        lastChkIndex = i;
       }
     }));
     JS.extend(tr.insertCell(1), {
@@ -313,6 +311,10 @@ $('#btnRoot').click(function() {
       });
     }
   });
+});
+
+$('#btnRefreshRoot').click(function() {
+  setDir(rootPath, maxDirDepth);
 });
 
 $('#tdResizePanel').on('mousedown', function(e) {

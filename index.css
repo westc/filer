@@ -94,11 +94,11 @@ fieldset {
 }
 #tdLeftTopPanel {
   height: 1px;
-  width: 30%;
+  width: 40%;
 }
 #tdLeftBottomPanel {
   height: 99%;
-  width: 30%;
+  width: 40%;
 }
 #tdResizePanel {
   cursor: ew-resize;
@@ -110,7 +110,7 @@ fieldset {
   display: block;
 }
 #tdRightPanel {
-  width: 70%;
+  width: 60%;
 }
 #divFilesWrap, #divEditorWrap {
   position: absolute;
