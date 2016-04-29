@@ -15,7 +15,7 @@ var BASE_CONSOLE = JS.map(console, function(value, name) {
 var APP_BASE_PATH = path.dirname(require.main.filename);
 var FUNCTIONS_PATH = path.join(APP_BASE_PATH, 'functions.js');
 var APP_SETTINGS_PATH = path.join(APP_BASE_PATH, 'settings.json');
-var ctx, rootPath, maxDirDepth, files = [];
+var ctx, rootPath, maxDirDepth, isResizingPanels, files = [];
 
 var initDone;
 var appSettings = {
@@ -50,6 +50,15 @@ var appSettings = {
     fs.writeFile(APP_SETTINGS_PATH, JSON.stringify(this._, null, 2), 'utf8');
   }, 500)
 };
+
+(function(dirPath, dirDepth, split) {
+  if (dirPath) {
+    setDir(dirPath, dirDepth);
+  }
+  if (split != undefined) {
+    repositionSplit(split);
+  }
+})(appSettings.get('dirPath'), appSettings.get('dirDepth'), appSettings.get('split'));
 
 var editor = ace.edit("editor");
 editor.setOptions({
@@ -91,12 +100,6 @@ editor.on("change", JS(function() {
 // time a character changes but also prevents a weird error that was causing
 // the caret to jump around every time an error was introduced.
 }).debounce(500).callReturn().$);
-
-(function(dirPath, dirDepth) {
-  if (dirPath) {
-    setDir(dirPath, dirDepth);
-  }
-})(appSettings.get('dirPath'), appSettings.get('dirDepth'));
 
 function recurseDirSync(currentDirPath, depthLeft, opt_filter) {
   depthLeft--;
@@ -300,3 +303,25 @@ $('#btnRoot').click(function() {
     }
   });
 });
+
+$('#tdResizePanel').on('mousedown', function(e) {
+  e.preventDefault();
+  $('body').addClass('resizing-panels');
+  isResizingPanels = true;
+});
+$('body')
+  .on('mousemove', function(e) {
+    if (isResizingPanels) {
+      repositionSplit(Math.round(100 * (e.pageX - 5) / $('body').width()));
+    }
+  })
+  .on('mouseup', function(e) {
+    $('body').removeClass('resizing-panels');
+    isResizingPanels = false;
+  });
+
+function repositionSplit(split) {
+  var pct = appSettings.set('split', split);
+  $('#tdLeftTopPanel, #tdLeftBottomPanel').css('width', pct + '%');
+  $('#tdRightPanel').css('width', (100 - pct) + '%');
+}
