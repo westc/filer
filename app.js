@@ -127,17 +127,16 @@ var updatePreview = JS.debounce(function() {
   $('.trDir, .trFile').each(function(i, tr) {
     var oldPath = $('#txtOldPath' + i, tr).val(),
         file = files[i],
-        value;
+        jText = $('#txtNewPath' + i, tr),
+        valueSetter = $('#chkPath' + i, tr).prop('checked') ? 'prop' : 'data';
     ctx._ = { path: oldPath, data: file };
     if (passMediaTags) {
       mm(fs.createReadStream(file.path), function (err, metadata) {
-        value = fn(oldPath, file, err ? false : metadata);
-        $('#txtNewPath' + i, tr).val(value).data('value', value);
+        jText[valueSetter]('value', fn(oldPath, file, err ? false : metadata));
       });
     }
     else {
-      value = fn(oldPath, file);
-      $('#txtNewPath' + i, tr).val(value).data('value', value);
+      jText[valueSetter]('value', fn(oldPath, file));
     }
   });
 
@@ -174,6 +173,7 @@ function setDir(dirPath, inMaxDirDepth) {
     JS.extend(tr.insertCell(0), {
       className: 'tdCheck'
     }).appendChild(JS.dom({
+      id: 'chkPath' + i,
       nodeName: 'input',
       type: 'checkbox',
       checked: true,
@@ -233,6 +233,19 @@ function setDir(dirPath, inMaxDirDepth) {
                   type: 'text',
                   value: relPath,
                   id: 'txtNewPath' + i,
+                  onkeydown: function(e) {
+                    if (e.which == 38) {
+                      $('#txtNewPath' + ((i - 1 + files.length) % files.length)).select();
+                    }
+                    else if (e.which == 40) {
+                      $('#txtNewPath' + ((i + 1) % files.length)).select();
+                    }
+                  },
+                  onkeyup: function(e) {
+                    if (e.which == 38 || e.which == 40) {
+                      this.select();
+                    }
+                  },
                   onfocus: function() {
                     $('#trFile' + i).addClass('focus');
                   },
