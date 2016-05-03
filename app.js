@@ -82,11 +82,7 @@ editor.on("change", JS(function() {
       if (oldCtx && oldCtx[name] + '' != fn + '') {
         selectedIndex = i;
       }
-      jSel.append(JS.dom({
-        nodeName: 'option',
-        textContent: name,
-        value: name
-      }));
+      jSel.append(JS.dom({ _: 'option', text: name, value: name }));
       i++;
     }
   }, JS.keys(ctx).sort());
@@ -179,7 +175,7 @@ function setDir(dirPath, inMaxDirDepth) {
       className: 'tdCheck'
     }).appendChild(JS.dom({
       id: 'chkPath' + i,
-      nodeName: 'input',
+      _: 'input',
       type: 'checkbox',
       checked: true,
       onfocus: function() {
@@ -206,23 +202,23 @@ function setDir(dirPath, inMaxDirDepth) {
       }
     }));
     JS.extend(tr.insertCell(1), {
-      className: 'tdTextboxes'
+      cls: 'tdTextboxes'
     }).appendChild(JS.dom({
-      nodeName: 'table',
-      className: 'tblTextboxes',
+      _: 'table',
+      cls: 'tblTextboxes',
       border: 0,
       cellPadding: 0,
       cellSpacing: 0,
-      children: [
+      $: [
         {
-          nodeName: 'tr',
-          children: [
+          _: 'tr',
+          $: [
             {
-              nodeName: 'td',
-              className: 'tdOld',
-              children: [
+              _: 'td',
+              cls: 'tdOld',
+              $: [
                 {
-                  nodeName: 'input',
+                  _: 'input',
                   type: 'text',
                   readOnly: true,
                   tabIndex: -1,
@@ -231,17 +227,13 @@ function setDir(dirPath, inMaxDirDepth) {
                 }
               ]
             },
+            { _: 'td', html: '&rarr;', cls: 'tdArrow' },
             {
-              nodeName: 'td',
-              innerHTML: '&rarr;',
-              className: 'tdArrow'
-            },
-            {
-              nodeName: 'td',
-              className: 'tdNew',
-              children: [
+              _: 'td',
+              cls: 'tdNew',
+              $: [
                 {
-                  nodeName: 'input',
+                  _: 'input',
                   type: 'text',
                   value: relPath,
                   id: 'txtNewPath' + i,
@@ -278,8 +270,10 @@ $('#btnApply').click(updatePreview);
 
 $('#btnRenameFiles').click(function() {
   JS.walk(files, function(file, i) {
-    var oldPath = file.path;
-    var newPath = path.normalize(rootPath + path.sep + $('#txtNewPath' + i).val()), pathToCheck = newPath, pathsToCreate = [];
+    var oldPath = file.path,
+        newPath = path.normalize(rootPath + path.sep + $('#txtNewPath' + i).val()),
+        pathToCheck = newPath,
+        pathsToCreate = [];
 
     if (oldPath != newPath) {
       while((pathToCheck = path.dirname(pathToCheck)).length > rootPath.length && !fs.existsSync(pathToCheck)) {
