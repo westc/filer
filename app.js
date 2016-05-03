@@ -202,7 +202,7 @@ function setDir(dirPath, inMaxDirDepth) {
       }
     }));
     JS.extend(tr.insertCell(1), {
-      cls: 'tdTextboxes'
+      className: 'tdTextboxes'
     }).appendChild(JS.dom({
       _: 'table',
       cls: 'tblTextboxes',
