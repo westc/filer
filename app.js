@@ -312,7 +312,9 @@ $('#btnRoot').click(function() {
 });
 
 $('#btnRefreshRoot').click(function() {
-  setDir(rootPath, maxDirDepth);
+  if (rootPath) {
+    setDir(rootPath, maxDirDepth);
+  }
 });
 
 $('#tdResizePanel').on('mousedown', function(e) {
