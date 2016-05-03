@@ -59,6 +59,11 @@ fieldset {
   background: linear-gradient(to bottom,  #d9f9ff 0%,#c5f7ff 40%,#a7f2ff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d9f9ff', endColorstr='#a7f2ff',GradientType=0 ); /* IE6-9 */
 }
+.trDir.off > td, .trFile.off > td {
+  background: #EEE;
+  background: -webkit-linear-gradient(top,  #FFF 0%,#EEE 40%,#CCC 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #FFF 0%,#EEE 40%,#CCC 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+}
 .tdCheck {
   width: 1px;
   padding: 5px 0 5px 5px;

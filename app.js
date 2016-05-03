@@ -69,13 +69,14 @@ editor.setOptions({
 });
 editor.setValue(appSettings.get('code'));
 editor.on("change", JS(function() {
-  var value = editor.getValue();
-  var oldCtx = ctx;
+  var value = editor.getValue(),
+      oldCtx = ctx;
   vm.createScript(value, { timeout: 3000 }).runInNewContext(ctx = { JS: JS, console: BASE_CONSOLE });
   appSettings.set('code', value);
 
   var jSel = $('#selRenamer');
-  var i = 0, selectedIndex = jSel.prop('selectedIndex');
+      i = 0,
+      selectedIndex = jSel.prop('selectedIndex');
   jSel.html('');
   JS.walk(ctx, function(fn, name) {
     if (JS.typeOf(fn, 'Function') && fn != JS && !/^_/.test(name)) {
@@ -199,6 +200,7 @@ function setDir(dirPath, inMaxDirDepth) {
           }
         }
         lastChkIndex = i;
+        $('#trFile' + i)[this.checked ? 'removeClass' : 'addClass']('off');
       }
     }));
     JS.extend(tr.insertCell(1), {
@@ -238,11 +240,13 @@ function setDir(dirPath, inMaxDirDepth) {
                   value: relPath,
                   id: 'txtNewPath' + i,
                   onkeydown: function(e) {
+                    var prevAll = $('#trFile' + i).prevAll('.trDir:not(.off), .trFile:not(.off)');
+                    var nextAll = $('#trFile' + i).nextAll('.trDir:not(.off), .trFile:not(.off)');
                     if (e.which == 38) {
-                      $('#txtNewPath' + ((i - 1 + files.length) % files.length)).select();
+                      $(prevAll[0] || JS.nth(nextAll, -1)).find(':text[id^=txtNewPath]').select();
                     }
                     else if (e.which == 40) {
-                      $('#txtNewPath' + ((i + 1) % files.length)).select();
+                      $(nextAll[0] || JS.nth(prevAll, -1)).find(':text[id^=txtNewPath]').select();
                     }
                   },
                   onkeyup: function(e) {
