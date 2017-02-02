@@ -1,5 +1,6 @@
 # Filer
 This is an Electron desktop app which gives you the ability to rename and move files in bulk.
+![Applying A MP3/MP4 Tag Filter To All File Names](images/MP3_MP4 - Use Embed Title.png)
 
 ## Setup
 1. Install node and npm
