@@ -52,7 +52,7 @@ var appSettings = {
 };
 
 (function(dirPath, dirDepth, split) {
-  if (dirPath) {
+  if (dirPath && fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
     setDir(dirPath, dirDepth);
   }
   if (split != undefined) {
